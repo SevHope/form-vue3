@@ -46,7 +46,6 @@ const handleChange = (event) => {
 .ui-input-group {
   display: flex;
   flex-direction: column;
-  margin-bottom: 8px;
   width: 100%;
   max-width: 260px;
 }
@@ -63,7 +62,7 @@ const handleChange = (event) => {
   font-size: inherit;
 }
 
-.ui-input label {
+label {
   margin-bottom: 8px;
   color: #333;
 }
