@@ -10,7 +10,7 @@ const findField = (id) => {
 }
 
 const validateInitials = (initials, field) => {
-  const isValidLength = initials.length >= field.minLength && initials.length <= field.maxLength;
+  const isValidLength = initials.length >= field.minlength && initials.length <= field.maxlength;
   const isValidFormat = field.restrictions.test(initials);
   field.showError = !(isValidLength && isValidFormat);
 }
@@ -49,7 +49,7 @@ const validateIndex = (index, field) => {
 }
 
 const validateMessage = (message, field) => {
-  const isValid = message.length <= field.maxLength;
+  const isValid = message.length <= field.maxlength;
   field.showError = !isValid;
 }
 
@@ -132,13 +132,14 @@ const closeModal = () => {
           :error="item.showError ? item.errorMessage : ''"
           @change="validateItem"
           :label="item.label"
+          :maxlength="item.maxlength"
         />
         
         <!-- Все остальные компоненты -->
         <template v-else>
           <label :for="item.id">{{ item.label }}: </label>
           <MaskInput
-            v-if="item.type === 'tel'"
+            v-if="item.id === 'phone'"
             :type="item.type"
             :id="item.id"
             v-model="formStore.personsData[item.id]"
@@ -154,6 +155,7 @@ const closeModal = () => {
             v-model="formStore.personsData[item.id]"
             :placeholder="item.placeholder"
             @change="validateItem"
+            :maxlength="item.maxlength"
           ></textarea>
           
           <input
