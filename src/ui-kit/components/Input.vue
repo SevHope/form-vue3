@@ -1,5 +1,6 @@
 <template>
   <div class="ui-input-group">
+    <label :for="id">{{ label }}: </label>
     <input
       :type="type"
       :value="modelValue"
@@ -25,7 +26,9 @@ const props = defineProps({
   },
   error: String,
   required: Boolean,
-  placeholder: String
+  placeholder: String,
+  id: String,
+  label: String
 });
 
 const emit = defineEmits(['update:modelValue', 'change']);

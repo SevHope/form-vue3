@@ -120,7 +120,6 @@ const closeModal = () => {
   <form @submit.prevent="validateForm">
     <fieldset :disabled="formStore.state.formStatus !== 'active'">
       <div v-for="item in formStore.formItems" :key="item.id" :class="['form-item', item.class]">
-        <label :for="item.id">{{ item.label }}: </label>
         
         <!-- UiInput компоненты ФИО, email, дата и индекс -->
         <UiInput
@@ -132,10 +131,12 @@ const closeModal = () => {
           :required="item.required"
           :error="item.showError ? item.errorMessage : ''"
           @change="validateItem"
+          :label="item.label"
         />
         
         <!-- Все остальные компоненты -->
         <template v-else>
+          <label :for="item.id">{{ item.label }}: </label>
           <MaskInput
             v-if="item.type === 'tel'"
             :type="item.type"
