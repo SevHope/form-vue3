@@ -1,6 +1,6 @@
 <template>
   <div class="ui-input-group">
-    <label :for="id">{{ label }}: </label>
+    <label :for="id" class="ui-input-label">{{ label }}: </label>
     <input
       :type="type"
       :value="modelValue"
@@ -10,6 +10,7 @@
       @change="handleChange"
       class="ui-input"
       v-bind="$attrs"
+      :id="id"
     />
     <span v-if="error" class="ui-input-error">{{ error }}</span>
   </div>
@@ -62,7 +63,7 @@ const handleChange = (event) => {
   font-size: inherit;
 }
 
-label {
+.ui-input-label {
   margin-bottom: 8px;
   color: #333;
 }
