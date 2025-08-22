@@ -7,14 +7,14 @@ const formStore = useFormStore();
 const validation = createValidation(formStore);
 
 const clearForm = () => {
-  formStore.personsData.initials = '';
-  formStore.personsData.email = '';
-  formStore.personsData.phone = '';
-  formStore.personsData.date = '';
-  formStore.personsData.country = '';
-  formStore.personsData.index = '';
-  formStore.personsData.checked = false;
-  formStore.personsData.message = '';
+  formStore.formItems.initials = '';
+  formStore.formItems.email = '';
+  formStore.formItems.phone = '';
+  formStore.formItems.date = '';
+  formStore.formItems.country = '';
+  formStore.formItems.index = '';
+  formStore.formItems.checked = false;
+  formStore.formItems.message = '';
   const phoneInput = document.getElementById('phone');
   phoneInput.value = '';
 }
@@ -29,20 +29,23 @@ const closeModal = () => {
 <template>
   <form @submit.prevent="validation.validateForm">
     <fieldset :disabled="formStore.state.formStatus !== 'active'">
-      <div v-for="item in formStore.formItems" :key="item.id" :class="['form-item', item.class]">
-        
+      <div
+        v-for="item in formStore.formItems"
+        :key="item.id"
+        :class="['form-item', item.class]"
+      >
         <!-- UiInput компоненты ФИО, email, дата и индекс -->
         <UiInput
           v-if="item.tag === 'input' && !['checkbox', 'tel'].includes(item.type)"
-          :type="item.type"
           :id="item.id"
-          v-model="formStore.personsData[item.id]"
+          v-model="formStore.formItems[item.id]"
+          :type="item.type"
           :placeholder="item.placeholder"
           :required="item.required"
           :error="item.showError ? item.errorMessage : ''"
-          @change="validation.validateItem"
           :label="item.label"
           :maxlength="item.maxlength"
+          @change="validation.validateItem"
         />
         
         <!-- Все остальные компоненты -->
@@ -50,9 +53,9 @@ const closeModal = () => {
           <label :for="item.id">{{ item.label }}: </label>
           <MaskInput
             v-if="item.type === 'tel'"
-            :type="item.type"
             :id="item.id"
-            v-model="formStore.personsData[item.id]"
+            v-model="formStore.formItems[item.id]"
+            :type="item.type"
             :required="item.required"
             :placeholder="item.placeholder"
             :mask="formStore.phoneMask"
@@ -62,45 +65,78 @@ const closeModal = () => {
           <textarea
             v-if="item.tag === 'textarea'"
             :id="item.id"
-            v-model="formStore.personsData[item.id]"
+            v-model="formStore.formItems[item.id]"
             :placeholder="item.placeholder"
-            @change="validation.validateItem"
             :maxlength="item.maxlength"
-          ></textarea>
+            @change="validation.validateItem"
+          />
           
           <input
-        v-if="item.type === 'checkbox'"
-        :type="item.type"
-        :id="item.id"
-        v-model="formStore.personsData[item.id]"
-        :required="item.required"
-      />
-      <select
-        v-if="item.tag === 'select'"
-        :id="item.id"
-        v-model="formStore.personsData[item.id]"
-        :required="item.required"
-        :placeholder="item.placeholder"
-      >
-        <option disabled value="">{{ item.placeholder }}</option>
-        <option v-for="country in formStore.countries" :key="country" :value="country">
-          {{ country }}
-        </option>
-      </select>
-          <div v-if="item.showError" class="errorMessage">
+            v-if="item.type === 'checkbox'"
+            :id="item.id"
+            v-model="formStore.formItems[item.id]"
+            :type="item.type"
+            :required="item.required"
+          >
+          <select
+            v-if="item.tag === 'select'"
+            :id="item.id"
+            v-model="formStore.formItems[item.id]"
+            :required="item.required"
+            :placeholder="item.placeholder"
+          >
+            <option
+              disabled
+              value=""
+            >
+              {{ item.placeholder }}
+            </option>
+            <option
+              v-for="country in formStore.countries"
+              :key="country"
+              :value="country"
+            >
+              {{ country }}
+            </option>
+          </select>
+          <div
+            v-if="item.showError"
+            class="errorMessage"
+          >
             {{ item.errorMessage }}
           </div>
         </template>
       </div>
-      <button type="submit" v-if="formStore.state.formStatus !== 'isSubmitting'" :disabled="formStore.state.formStatus !== 'active'">Отправить</button>
-    <img src="./images/1494.gif" class="loader" v-if="formStore.state.formStatus === 'isSubmitting'">
+      <button
+        v-if="formStore.state.formStatus !== 'isSubmitting'"
+        type="submit"
+        :disabled="formStore.state.formStatus !== 'active'"
+      >
+        Отправить
+      </button>
+      <img
+        v-if="formStore.state.formStatus === 'isSubmitting'"
+        src="./images/1494.gif"
+        class="loader"
+      >
     </fieldset>
   </form>
-  <div v-if="formStore.state.formStatus === 'submited'" class="modal-overlay" @click.self="closeModal">
+  <div
+    v-if="formStore.state.formStatus === 'submited'"
+    class="modal-overlay"
+    @click.self="closeModal"
+  >
     <div class="modal-content">
-      <p v-if="formStore.state.formValid">Спасибо за отправку формы!</p>
-      <p v-if="!formStore.state.formValid">Форма заполнена некорректно.</p>
-      <button class="modal-close" @click="closeModal">
+      <p v-if="formStore.state.formValid">
+        Спасибо за отправку формы!
+      </p>
+      <p v-if="!formStore.state.formValid">
+        Форма заполнена некорректно.
+      </p>
+      <button
+        class="modal-close"
+        @click="closeModal"
+      >
         <span v-if="formStore.state.formValid">Закрыть</span>
         <span v-if="!formStore.state.formValid">Повторить</span>
       </button>

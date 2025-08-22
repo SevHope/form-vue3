@@ -1,19 +1,25 @@
 <template>
   <div class="ui-input-group">
-    <label :for="id" class="ui-input-label">{{ label }}: </label>
+    <label
+      :for="id"
+      class="ui-input-label"
+    >{{ label }}: </label>
     <input
+      v-bind="$attrs"
+      :id="id"
       :type="type"
       :value="modelValue"
       :placeholder="placeholder"
       :required="required"
+      class="ui-input"
+      :maxlength="maxlength"
       @input="handleInput"
       @change="handleChange"
-      class="ui-input"
-      v-bind="$attrs"
-      :id="id"
-      :maxlength="maxlength"
-    />
-    <span v-if="error" class="ui-input-error">{{ error }}</span>
+    >
+    <span
+      v-if="error"
+      class="ui-input-error"
+    >{{ error }}</span>
   </div>
 </template>
 
