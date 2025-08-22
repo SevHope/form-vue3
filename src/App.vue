@@ -1,191 +1,149 @@
 <script setup>
 import { useFormStore } from './stores/FormStore';
 import { MaskInput } from 'vue-3-mask';
+import { createValidation } from './validation'
 
 const formStore = useFormStore();
-
-const findField = (id) => {
-  const field = formStore.formItems.find(item => item.id === id) || null;
-  return field;
-}
-
-const validateInitials = (initials, field) => {
-  const isValidLength = initials.length >= field.minLength && initials.length <= field.maxLength;
-  const isValidFormat = field.restrictions.test(initials);
-  field.showError = !(isValidLength && isValidFormat);
-}
-
-const validateEmail = (email, field) => {
-  const isValidEmail = field.restrictions.test(email);
-  field.showError = !(isValidEmail);
-}
-
-const validatePhone = (phone, field) => {
-  const phoneNumbers = phone.replace(field.restrictions, '');
-  const isValid = phoneNumbers.length === field.correctLength;
-  field.showError = !isValid;
-};
-
-const calculateAge = (date) => {
-  const today = new Date();
-  const birthDate = new Date(date);
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const monthDiff = today.getMonth() - birthDate.getMonth();
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-    age-=1;
-  }
-  return age;
-};
-
-const validateDate = (date, field) => {
-  const age = calculateAge(date);
-  const isValid = age >= field.minAge;
-  field.showError = !isValid;
-};
-
-const validateIndex = (index, field) => {
-  const isValid = field.restrictions.test(index);
-  field.showError = !isValid;
-}
-
-const validateMessage = (message, field) => {
-  const isValid = message.length <= field.maxLength;
-  field.showError = !isValid;
-}
-
-const validateItem = (event) => {
-  const field = findField(event.target.id);
-  switch (event.target.id) {
-  case 'initials':
-    validateInitials(event.target.value, field)
-    break;
-  case 'email':
-    validateEmail(event.target.value, field)
-    break;
-  case 'phone':
-    validatePhone(event.target.value, field)
-    break;
-  case 'date':
-    validateDate(event.target.value, field)
-    break;
-  case 'index':
-    validateIndex(event.target.value, field)
-    break;
-  case 'message':
-    validateMessage(event.target.value, field)
-    break;
-  default:
-    console.log('нет такого id')
-}
-}
+const validation = createValidation(formStore);
 
 const clearForm = () => {
-  formStore.personsData.initials = '';
-  formStore.personsData.email = '';
-  formStore.personsData.phone = '';
-  formStore.personsData.date = '';
-  formStore.personsData.country = '';
-  formStore.personsData.index = '';
-  formStore.personsData.checked = false;
-  formStore.personsData.message = '';
+  formStore.formItems.initials = '';
+  formStore.formItems.email = '';
+  formStore.formItems.phone = '';
+  formStore.formItems.date = '';
+  formStore.formItems.country = '';
+  formStore.formItems.index = '';
+  formStore.formItems.checked = false;
+  formStore.formItems.message = '';
   const phoneInput = document.getElementById('phone');
   phoneInput.value = '';
 }
 
-const checkFields = () => {
-    formStore.state.formValid = formStore.formItems.every(field => {
-      return !field.showError;
-    })
-    formStore.state.formStatus = 'submited';
-    if (formStore.state.formValid === true) {
-      clearForm();
-    }
-}
-
-const validateForm = () => {
-  formStore.state.formStatus = 'isSubmitting';
-  setTimeout(() => {
-    checkFields();
-  }, 2000);
-};
-
 const closeModal = () => {
+  formStore.state.formValid ? clearForm() : null;
   formStore.state.formStatus = 'active';
 }
 
 </script>
 
 <template>
-  <form @submit.prevent="validateForm">
+  <form @submit.prevent="validation.validateForm">
     <fieldset :disabled="formStore.state.formStatus !== 'active'">
-    <div v-for="item in formStore.formItems" :key="item.id" :class="['form-item', item.class]">
-      <label :for="item.id">{{ item.label }}: </label>
-      
-      <!-- ФИО, email, дата, индекс -->
-      <input
-        v-if="item.tag === 'input' && !['checkbox', 'tel'].includes(item.type)"
-        :type="item.type"
-        :id="item.id"
-        v-model="formStore.personsData[item.id]"
-        :placeholder="item.placeholder"
-        :required="item.required"
-        @change="validateItem"
-      />
-      <MaskInput
-      v-if="item.type === 'tel'"
-      :type="item.type"
-      :id="item.id"
-      v-model="formStore.personsData[item.id]"
-      :required="item.required"
-      :placeholder="item.placeholder"
-      :mask="formStore.phoneMask"
-      @change="validateItem"
-      />
-      <textarea
-        v-if="item.tag === 'textarea'"
-        :id="item.id"
-        v-model="formStore.personsData[item.id]"
-        :placeholder="item.placeholder"
-        @change="validateItem"
-      ></textarea>
-      <input
-        v-if="item.type === 'checkbox'"
-        :type="item.type"
-        :id="item.id"
-        v-model="formStore.personsData[item.id]"
-        :required="item.required"
-      />
-      <select
-        v-if="item.tag === 'select'"
-        :id="item.id"
-        v-model="formStore.personsData[item.id]"
-        :required="item.required"
-        :placeholder="item.placeholder"
+      <div
+        v-for="item in formStore.formItems"
+        :key="item.id"
+        :class="['form-item', item.class]"
       >
-        <option disabled value="">{{ item.placeholder }}</option>
-        <option v-for="country in formStore.countries" :key="country" :value="country">
-          {{ country }}
-        </option>
-      </select>
-      <div class="errorMessage" v-show="item.showError">{{ item.errorMessage }}</div>
-    </div>
-
-    <button type="submit" v-if="formStore.state.formStatus !== 'isSubmitting'" :disabled="formStore.state.formStatus !== 'active'">Отправить</button>
-    <img src="./images/1494.gif" class="loader" v-if="formStore.state.formStatus === 'isSubmitting'">
+        <!-- UiInput компоненты ФИО, email, дата и индекс -->
+        <UiInput
+          v-if="item.tag === 'input' && !['checkbox', 'tel'].includes(item.type)"
+          :id="item.id"
+          v-model="formStore.formItems[item.id]"
+          :type="item.type"
+          :placeholder="item.placeholder"
+          :required="item.required"
+          :error="item.showError ? item.errorMessage : ''"
+          :label="item.label"
+          :maxlength="item.maxlength"
+          @change="validation.validateItem"
+        />
+        
+        <!-- Все остальные компоненты -->
+        <template v-else>
+          <label :for="item.id">{{ item.label }}: </label>
+          <MaskInput
+            v-if="item.type === 'tel'"
+            :id="item.id"
+            v-model="formStore.formItems[item.id]"
+            :type="item.type"
+            :required="item.required"
+            :placeholder="item.placeholder"
+            :mask="formStore.phoneMask"
+            @change="validation.validateItem"
+          />
+          
+          <textarea
+            v-if="item.tag === 'textarea'"
+            :id="item.id"
+            v-model="formStore.formItems[item.id]"
+            :placeholder="item.placeholder"
+            :maxlength="item.maxlength"
+            @change="validation.validateItem"
+          />
+          
+          <input
+            v-if="item.type === 'checkbox'"
+            :id="item.id"
+            v-model="formStore.formItems[item.id]"
+            :type="item.type"
+            :required="item.required"
+          >
+          <select
+            v-if="item.tag === 'select'"
+            :id="item.id"
+            v-model="formStore.formItems[item.id]"
+            :required="item.required"
+            :placeholder="item.placeholder"
+          >
+            <option
+              disabled
+              value=""
+            >
+              {{ item.placeholder }}
+            </option>
+            <option
+              v-for="country in formStore.countries"
+              :key="country"
+              :value="country"
+            >
+              {{ country }}
+            </option>
+          </select>
+          <div
+            v-if="item.showError"
+            class="errorMessage"
+          >
+            {{ item.errorMessage }}
+          </div>
+        </template>
+      </div>
+      <button
+        v-if="formStore.state.formStatus !== 'isSubmitting'"
+        type="submit"
+        :disabled="formStore.state.formStatus !== 'active'"
+      >
+        Отправить
+      </button>
+      <img
+        v-if="formStore.state.formStatus === 'isSubmitting'"
+        src="./images/1494.gif"
+        class="loader"
+      >
     </fieldset>
   </form>
-  
-  <div v-if="formStore.state.formStatus === 'submited'" class="modal-overlay" @click.self="closeModal">
+  <div
+    v-if="formStore.state.formStatus === 'submited'"
+    class="modal-overlay"
+    @click.self="closeModal"
+  >
     <div class="modal-content">
-      <p v-if="formStore.state.formValid">Спасибо за отправку формы!</p>
-      <p v-if="!formStore.state.formValid">Форма заполнена некорректно.</p>
-      <button class="modal-close" @click="closeModal">
+      <p v-if="formStore.state.formValid">
+        Спасибо за отправку формы!
+      </p>
+      <p v-if="!formStore.state.formValid">
+        Форма заполнена некорректно.
+      </p>
+      <button
+        class="modal-close"
+        @click="closeModal"
+      >
         <span v-if="formStore.state.formValid">Закрыть</span>
         <span v-if="!formStore.state.formValid">Повторить</span>
       </button>
     </div>
   </div>
 </template>
+
 
 <style scoped>
 fieldset {
