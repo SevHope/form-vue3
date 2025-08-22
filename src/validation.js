@@ -1,7 +1,7 @@
 export function createValidation(formStore) {
-    return {
-        validateItem: (event) => {
-            const field = formStore.formItems.find(item => item.id === event.target.id) || null;
+  return {
+    validateItem: (event) => {
+      const field = formStore.formItems.find(item => item.id === event.target.id) || null;
   switch (event.target.id) {
   case 'initials':
     validateInitials(event.target.value, field)
@@ -36,9 +36,8 @@ validateForm: () => {
     }
 
 const validateInitials = (initials, field) => {
-  const isValidLength = initials.length >= field.minlength && initials.length <= field.maxlength;
-  const isValidFormat = field.restrictions.test(initials);
-  field.showError = !(isValidLength && isValidFormat);
+  const isValid = field.restrictions.test(initials);
+  field.showError = !(isValid);
 }
 
 const validateEmail = (email, field) => {

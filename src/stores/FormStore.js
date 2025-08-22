@@ -8,7 +8,7 @@ export const useFormStore = defineStore("form", () => {
     })
 
 const formItems = reactive([
-  {id: 'initials', value: '', tag: 'input', class: 'formInput', placeholder: 'Введите ФИО', type: 'text', label: 'ФИО', required: true, minlength: 2, maxlength: 200, restrictions: /^[A-Za-zА-Яа-яёЁ\s-]+$/, errorMessage: 'ФИО должно быть от 2 до 200 символов и содержать только буквы, пробелы и дефис', showError: false },
+  {id: 'initials', value: '', tag: 'input', class: 'formInput', placeholder: 'Введите ФИО', type: 'text', label: 'ФИО', required: true, minlength: 2, maxlength: 200, restrictions: /^[A-Za-zА-Яа-яёЁ\s-]{2,200}$/, errorMessage: 'ФИО должно быть от 2 до 200 символов и содержать только буквы, пробелы и дефис', showError: false },
   {id: 'email', value: '', tag: 'input', class: 'formInput', placeholder: 'Введите почту', type: 'email', label: 'Почта', required: true, restrictions: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+/, errorMessage: 'Введен некорректный email', showError: false },
   {id: 'phone', value: '', tag: 'input', class: 'formInput', placeholder: '+7 (xxx) xxx-xx-xx', type: 'tel', label: 'Телефон', required: true, correctLength: 11, restrictions: /\D/g, errorMessage: 'Укажите телефон в формате +7 xxx xxx-xx-xx', showError: false },
   {id: 'date', value: '', tag: 'input', class: 'formInput', placeholder: 'Введите дату рождения', type: 'date', label: 'Дата рождения', minAge: 18, errorMessage: 'Возраст должен быть больше или равен 18', showError: false },
