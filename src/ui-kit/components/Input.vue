@@ -12,7 +12,6 @@
       v-bind="$attrs"
       :id="id"
       :maxlength="maxlength"
-      :checked="checked"
     />
     <span v-if="error" class="ui-input-error">{{ error }}</span>
   </div>
@@ -22,7 +21,7 @@
 import { defineProps, defineEmits } from 'vue';
 
 const props = defineProps({
-  modelValue: [String, Number, Boolean],
+  modelValue: [String, Number],
   type: {
     type: String,
     default: 'text',
@@ -33,9 +32,8 @@ const props = defineProps({
   id: String,
   label: String,
   maxlength: Number,
-  checked: Boolean
 });
-console.log(props, 'props');
+
 const emit = defineEmits(['update:modelValue', 'change']);
 
 const handleInput = (event) => {
@@ -80,22 +78,5 @@ const handleChange = (event) => {
   color: red;
   font-size: 12px;
   margin-top: 4px;
-}
-
-.ui-input-group:has(input[type="checkbox"]) {
-  display: inline-flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  height: auto;
-  padding: 5px 0;
-}
-
-.input[type="checkbox"] label {
-  margin-bottom: 0px;
-}
-
-input[type="checkbox"] {
-  width: 20px;
 }
 </style>

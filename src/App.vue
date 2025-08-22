@@ -1,83 +1,10 @@
 <script setup>
 import { useFormStore } from './stores/FormStore';
 import { MaskInput } from 'vue-3-mask';
+import { createValidation } from './validation'
 
 const formStore = useFormStore();
-
-const findField = (id) => {
-  const field = formStore.formItems.find(item => item.id === id) || null;
-  return field;
-}
-
-const validateInitials = (initials, field) => {
-  const isValidLength = initials.length >= field.minlength && initials.length <= field.maxlength;
-  const isValidFormat = field.restrictions.test(initials);
-  field.showError = !(isValidLength && isValidFormat);
-}
-
-const validateEmail = (email, field) => {
-  const isValidEmail = field.restrictions.test(email);
-  field.showError = !(isValidEmail);
-}
-
-const validatePhone = (phone, field) => {
-  const phoneNumbers = phone.replace(field.restrictions, '');
-  const isValid = phoneNumbers.length === field.correctLength;
-  field.showError = !isValid;
-};
-
-const calculateAge = (date) => {
-  const today = new Date();
-  const birthDate = new Date(date);
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const monthDiff = today.getMonth() - birthDate.getMonth();
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-    age-=1;
-  }
-  return age;
-};
-
-const validateDate = (date, field) => {
-  const age = calculateAge(date);
-  const isValid = age >= field.minAge;
-  field.showError = !isValid;
-};
-
-const validateIndex = (index, field) => {
-  const isValid = field.restrictions.test(index);
-  field.showError = !isValid;
-}
-
-const validateMessage = (message, field) => {
-  const isValid = message.length <= field.maxlength;
-  field.showError = !isValid;
-}
-
-const validateItem = (event) => {
-  const field = findField(event.target.id);
-  switch (event.target.id) {
-  case 'initials':
-    validateInitials(event.target.value, field)
-    break;
-  case 'email':
-    validateEmail(event.target.value, field)
-    break;
-  case 'phone':
-    validatePhone(event.target.value, field)
-    break;
-  case 'date':
-    validateDate(event.target.value, field)
-    break;
-  case 'index':
-    validateIndex(event.target.value, field)
-    break;
-  case 'message':
-    validateMessage(event.target.value, field)
-    break;
-  default:
-    console.log('нет такого id')
-}
-}
+const validation = createValidation(formStore);
 
 const clearForm = () => {
   formStore.personsData.initials = '';
@@ -92,32 +19,15 @@ const clearForm = () => {
   phoneInput.value = '';
 }
 
-const checkFields = () => {
-    formStore.state.formValid = formStore.formItems.every(field => {
-      return !field.showError;
-    })
-    formStore.state.formStatus = 'submited';
-    if (formStore.state.formValid === true) {
-      clearForm();
-    }
-}
-
-const validateForm = () => {
-  console.log(formStore.personsData);
-  formStore.state.formStatus = 'isSubmitting';
-  setTimeout(() => {
-    checkFields();
-  }, 2000);
-};
-
 const closeModal = () => {
+  formStore.state.formValid ? clearForm() : null;
   formStore.state.formStatus = 'active';
 }
 
 </script>
 
 <template>
-  <form @submit.prevent="validateForm">
+  <form @submit.prevent="validation.validateForm">
     <fieldset :disabled="formStore.state.formStatus !== 'active'">
       <div v-for="item in formStore.formItems" :key="item.id" :class="['form-item', item.class]">
         
@@ -130,7 +40,7 @@ const closeModal = () => {
           :placeholder="item.placeholder"
           :required="item.required"
           :error="item.showError ? item.errorMessage : ''"
-          @change="validateItem"
+          @change="validation.validateItem"
           :label="item.label"
           :maxlength="item.maxlength"
         />
@@ -139,14 +49,14 @@ const closeModal = () => {
         <template v-else>
           <label :for="item.id">{{ item.label }}: </label>
           <MaskInput
-            v-if="item.id === 'phone'"
+            v-if="item.type === 'tel'"
             :type="item.type"
             :id="item.id"
             v-model="formStore.personsData[item.id]"
             :required="item.required"
             :placeholder="item.placeholder"
             :mask="formStore.phoneMask"
-            @change="validateItem"
+            @change="validation.validateItem"
           />
           
           <textarea
@@ -154,7 +64,7 @@ const closeModal = () => {
             :id="item.id"
             v-model="formStore.personsData[item.id]"
             :placeholder="item.placeholder"
-            @change="validateItem"
+            @change="validation.validateItem"
             :maxlength="item.maxlength"
           ></textarea>
           
